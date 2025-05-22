@@ -1,9 +1,11 @@
 package dealer.customer.controller.error;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.NoSuchElementException;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -74,6 +76,31 @@ public class GlobalControllerErrorHandler {
 			WebRequest webRequest)
 	{
 		return buildExceptionMessage(ex, HttpStatus.INTERNAL_SERVER_ERROR, webRequest, LogStatus.MESSAGE_ONLY);
+	}
+	
+	/****************************************************************
+	 *             DataIntegrityViolationException  
+	****************************************************************/
+	
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	@ResponseStatus(code = HttpStatus.CONFLICT)
+	public ExceptionMessage handleDataIntegrityViolationException(DataIntegrityViolationException ex,
+			WebRequest webRequest)
+	{
+		return buildExceptionMessage(ex, HttpStatus.CONFLICT, webRequest, LogStatus.MESSAGE_ONLY);
+	}
+	
+	
+	/****************************************************************
+	*            SQLIntegrityConstraintViolationException  
+	****************************************************************/
+	
+	@ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+	@ResponseStatus(code = HttpStatus.CONFLICT)
+	public ExceptionMessage handleSQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException ex,
+			WebRequest webRequest)
+	{
+		return buildExceptionMessage(ex, HttpStatus.CONFLICT, webRequest, LogStatus.MESSAGE_ONLY);
 	}
 	
 	/**************************************************************

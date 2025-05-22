@@ -140,7 +140,7 @@ public class DealerCustomerController {
 	@DeleteMapping("/customer/{customerId}")  // NOT WORKING ?????
 	public Map<String, String> deleteCustomerForGivenCustomerId(@PathVariable Long customerId) {
 		
-		log.info("Deleting customer data where customerId= {}", customerId);
+		log.info("Deleting customer data where customerId= {}",customerId);
 		dealerCustomerService.deleteCustomerByCustomerId(customerId);
 		
 		return Map.of("message", "Deletion of customer with ID=" + customerId + " was successful.");
@@ -165,12 +165,12 @@ public class DealerCustomerController {
 	/*************************************************************************
 	 *                        Update a Vehicle by Id
 	************************************************************************/
-	@PutMapping("/dealer/{dealerId}/vehicle")
-	public DealerVehicle updateVehicleForGivenVehicleId(@PathVariable Long dealerId, @RequestBody DealerVehicle dealerVehicle) {
+	@PutMapping("/vehicle/{vehicleId}")
+	public DealerVehicle updateVehicleForGivenVehicleId(@PathVariable Long vehicleId, @RequestBody DealerVehicle dealerVehicle) {
 		
-		dealerVehicle.setVehicleId(dealerId);
-		log.info("Updating Vehicle data {}", dealerVehicle, dealerId);
-		return dealerCustomerService.updateVehicleById(dealerId, dealerVehicle);
+		dealerVehicle.setVehicleId(vehicleId);
+		log.info("Updating Vehicle data {}", dealerVehicle, vehicleId);
+		return dealerCustomerService.updateVehicleById(vehicleId, dealerVehicle);
 	
 	}
 	

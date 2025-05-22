@@ -9,12 +9,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 @Entity
 @Data
+@Table(name ="customer") //added on 5/21
 public class Customer {
 	
 	@Id
@@ -26,8 +28,9 @@ public class Customer {
 	private String customerEmail;
 	private String customerPhone;
 	
+	// 
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
-	@ManyToMany (mappedBy = "customers", cascade = CascadeType.PERSIST)  // java field name: customers in the Dealer class
+	@ManyToMany (mappedBy = "customers", cascade = CascadeType.PERSIST)
 	private Set<Dealer> dealers = new HashSet<Dealer>();
 }

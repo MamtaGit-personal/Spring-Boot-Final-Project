@@ -63,31 +63,7 @@ public class DealerCustomerService {
 	}
 	
 	/*******************************************************************
-	 * updateDealer() - updates DealerData 
-	 *******************************************************************/
-	@Transactional(readOnly = false)
-	public DealerData updateDealer(DealerData dealerData) {
-
-		Long dealerId = dealerData.getDealerId();
-		log.info("The dealerId = {}", dealerId); 
-		
-		Dealer dealer = findDealerById(dealerId);
-		setFieldsInDealer(dealer, dealerData);
-		return new DealerData(dealerDao.save(dealer));
-	}
-	
-	/*******************************************************************
-	 * findDealerById() -finds dealer for a given dealerId
-	*******************************************************************/
-	private Dealer findDealerById(Long dealerId) {
-		
-		return dealerDao.findById(dealerId)
-			.orElseThrow( () -> new NoSuchElementException(
-			"Dealer with ID=" + dealerId + " was NOT found."));
-	}
-	
-	/*******************************************************************
-	 * retrieveDealerById() method finds dealer for 
+	 * retrieveDealerById() method - finds dealer for 
 	 * the given dealerId
 	*******************************************************************/
 	@Transactional(readOnly = true)
@@ -96,6 +72,19 @@ public class DealerCustomerService {
 		DealerData dealerData = new DealerData(dealer);
 		return dealerData;
 	}
+	
+	/*******************************************************************
+	 * findDealerById() -finds dealer for a given dealerId
+	 * If the dealerId is not present, it handles 
+	 * NoSuchElementException exception gracefully
+	*******************************************************************/
+	private Dealer findDealerById(Long dealerId) {
+		
+		return dealerDao.findById(dealerId)
+			.orElseThrow( () -> new NoSuchElementException(
+			"Dealer with ID=" + dealerId + " was NOT found."));
+	}
+	
 	
 	/*******************************************************************
 	 * Retrieves all Dealers
@@ -111,7 +100,20 @@ public class DealerCustomerService {
 		return result;
 	}
 
-	
+	/*******************************************************************
+	 * updateDealer() - updates DealerData 
+	 *******************************************************************/
+	@Transactional(readOnly = false)
+	public DealerData updateDealer(DealerData dealerData) {
+
+		Long dealerId = dealerData.getDealerId();
+		log.info("The dealerId = {}", dealerId); 
+		
+		Dealer dealer = findDealerById(dealerId);
+		setFieldsInDealer(dealer, dealerData);
+		return new DealerData(dealerDao.save(dealer));
+	}
+		
 	/*******************************************************************
 	 * Delete a dealer for a given dealerId
 	*******************************************************************/
@@ -196,8 +198,8 @@ public class DealerCustomerService {
 	public DealerCustomer updateCustomerForGivenCustomerId(Long customerId,
 			DealerCustomer dealerCustomer) {
 
-		Customer updateCustomer = findCustomerById(customerId);
-		setFieldsInCustomer(updateCustomer, dealerCustomer);
+		Customer updateThisCustomer = findCustomerById(customerId);
+		setFieldsInCustomer(updateThisCustomer, dealerCustomer);
 		
 		/*******************************************************************/	
 		List<Dealer> dealers = dealerDao.findAll();
@@ -213,7 +215,7 @@ public class DealerCustomerService {
 		
 		/*******************************************************************/
 		
-		return new DealerCustomer(customerDao.save(updateCustomer));
+		return new DealerCustomer(customerDao.save(updateThisCustomer));
 	}
 	
 	/*********************************************************************
@@ -223,18 +225,18 @@ public class DealerCustomerService {
 	public void deleteCustomerByCustomerId(Long customerId) {
 		Customer deleteCustomer = findCustomerById(customerId);
 		
-		/*********************  Need to Work below  ********************/
 		List<Dealer> dealers = dealerDao.findAll();
+		
 		for(Dealer dealer : dealers) {
 			Set<Customer> customers = dealer.getCustomers();
 			for(Customer customer : customers) {
 				if(customer.getCustomerId() == customerId) {
-					customerDao.delete(customer);
+					log.info("The customerId = {}", customer.getCustomerId()); 
+					dealer.removeCustomer(customer);
 				}
-			}
-		} 
-		/*********************  Need to Work above  ********************/
-		
+			} 
+		}
+				
 		customerDao.delete(deleteCustomer);
 	}
 
@@ -257,8 +259,7 @@ public class DealerCustomerService {
 		vehicle.setDealer(dealer);
 		dealer.getVehicles().add(vehicle);
 		
-		Vehicle savedVehicle = vehicleDao.save(vehicle);
-		return new DealerVehicle(savedVehicle);
+		return new DealerVehicle(vehicleDao.save(vehicle));
 	}
 	
 	/************************************************************************/
@@ -279,8 +280,8 @@ public class DealerCustomerService {
 	@Transactional(readOnly = false)
 	public DealerVehicle updateVehicleById(Long vehicleId, DealerVehicle dealerVehicle) {
 		
-		Vehicle updateVehicle = findVehiclerById(vehicleId);
-		setFieldsInVehicle(updateVehicle, dealerVehicle);
+		Vehicle updateThisVehicle = findVehiclerById(vehicleId);
+		setFieldsInVehicle(updateThisVehicle, dealerVehicle);
 		
 		/*******************************************************/
 		List<Dealer> dealers = dealerDao.findAll();
@@ -294,14 +295,7 @@ public class DealerCustomerService {
 			}
 		} 
 		/********************************************************/
-		return new DealerVehicle(updateVehicle);
-	}
-	
-	/*********************************************************************/
-	private Vehicle findVehiclerById(Long vehicleId) {
-		return vehicleDao.findById(vehicleId)
-				.orElseThrow( () -> new NoSuchElementException(
-						"Vehicle with ID=" + vehicleId + " was NOT found."));
+		return new DealerVehicle(vehicleDao.save(updateThisVehicle));
 	}
 	
 	/*************************************************************************
@@ -313,6 +307,13 @@ public class DealerCustomerService {
 		return new DealerVehicle(vehicle);
 	}
 
+	/*********************************************************************/
+	private Vehicle findVehiclerById(Long vehicleId) {
+		return vehicleDao.findById(vehicleId)
+				.orElseThrow( () -> new NoSuchElementException(
+						"Vehicle with ID=" + vehicleId + " was NOT found."));
+	}
+	
 	/*************************************************************************
 	 *                        Retrieve all Vehicles 
 	************************************************************************/
@@ -329,7 +330,7 @@ public class DealerCustomerService {
 	}
 
 	/*************************************************************************
-	 *                        Delete a Vehicle
+	 *                Delete a Vehicle for a given vehicleId
 	************************************************************************/
 	@Transactional(readOnly = false)
 	public void deleteVehicleIdByVehicleId(Long vehicleId) {

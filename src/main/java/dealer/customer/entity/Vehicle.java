@@ -26,7 +26,7 @@ public class Vehicle {
 	
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
-	@ManyToOne(cascade = CascadeType.ALL)  //java field name, vehicles in the Dealer class
+	@ManyToOne(cascade = CascadeType.PERSIST) //changed to CascadeType.PERSIST. CascadeType.ALL was deleting a vehicle and dealer as well
 	@JoinColumn(name = "dealer_id", nullable = false)
 	private Dealer dealer;
 }
